@@ -1,8 +1,5 @@
 //
 //  scannerApp.swift
-//  scanner
-//
-//  Created by Piotr Puszczyński on 15/10/2022.
 //
 
 import SwiftUI

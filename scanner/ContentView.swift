@@ -1,21 +1,13 @@
 //
 //  ContentView.swift
-//  scanner
-//
-//  Created by Piotr Puszczyński on 15/10/2022.
 //
 
 import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundColor(.accentColor)
-            Text("Hello, world!")
-        }
-        .padding()
+        CameraRunner()
+            .edgesIgnoringSafeArea(.all)
     }
 }
 
