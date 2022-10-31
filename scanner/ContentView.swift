@@ -7,7 +7,7 @@ import SwiftUI
 struct ContentView: View {
     var body: some View {
         CameraRunner()
-            .edgesIgnoringSafeArea(.all)
+            .ignoresSafeArea()
     }
 }
 

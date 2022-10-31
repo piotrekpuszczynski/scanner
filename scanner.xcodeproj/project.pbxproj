@@ -9,6 +9,11 @@
 /* Begin PBXBuildFile section */
 		160FC72328FB0C00005B8C00 /* CameraRunner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 160FC72228FB0C00005B8C00 /* CameraRunner.swift */; };
 		160FC72528FB0C0D005B8C00 /* CameraController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 160FC72428FB0C0D005B8C00 /* CameraController.swift */; };
+		160FC729290C0B97005B8C00 /* CameraDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 160FC728290C0B97005B8C00 /* CameraDetector.swift */; };
+		160FC72B290C0DC4005B8C00 /* RectsArray.swift in Sources */ = {isa = PBXBuildFile; fileRef = 160FC72A290C0DC4005B8C00 /* RectsArray.swift */; };
+		160FC72D290C57B3005B8C00 /* PhotoCaptureProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 160FC72C290C57B3005B8C00 /* PhotoCaptureProcessor.swift */; };
+		160FC731290FF7A8005B8C00 /* ResultsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 160FC730290FF7A8005B8C00 /* ResultsView.swift */; };
+		160FC73329103226005B8C00 /* Button.swift in Sources */ = {isa = PBXBuildFile; fileRef = 160FC73229103226005B8C00 /* Button.swift */; };
 		16116FAB28FB0A96005ED2F0 /* scannerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16116FAA28FB0A96005ED2F0 /* scannerApp.swift */; };
 		16116FAD28FB0A96005ED2F0 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16116FAC28FB0A96005ED2F0 /* ContentView.swift */; };
 		16116FAF28FB0A96005ED2F0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16116FAE28FB0A96005ED2F0 /* Assets.xcassets */; };
@@ -18,6 +23,11 @@
 /* Begin PBXFileReference section */
 		160FC72228FB0C00005B8C00 /* CameraRunner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraRunner.swift; sourceTree = "<group>"; };
 		160FC72428FB0C0D005B8C00 /* CameraController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraController.swift; sourceTree = "<group>"; };
+		160FC728290C0B97005B8C00 /* CameraDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraDetector.swift; sourceTree = "<group>"; };
+		160FC72A290C0DC4005B8C00 /* RectsArray.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RectsArray.swift; sourceTree = "<group>"; };
+		160FC72C290C57B3005B8C00 /* PhotoCaptureProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoCaptureProcessor.swift; sourceTree = "<group>"; };
+		160FC730290FF7A8005B8C00 /* ResultsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResultsView.swift; sourceTree = "<group>"; };
+		160FC73229103226005B8C00 /* Button.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Button.swift; sourceTree = "<group>"; };
 		16116FA728FB0A96005ED2F0 /* scanner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = scanner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		16116FAA28FB0A96005ED2F0 /* scannerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = scannerApp.swift; sourceTree = "<group>"; };
 		16116FAC28FB0A96005ED2F0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -41,6 +51,11 @@
 			children = (
 				160FC72228FB0C00005B8C00 /* CameraRunner.swift */,
 				160FC72428FB0C0D005B8C00 /* CameraController.swift */,
+				160FC728290C0B97005B8C00 /* CameraDetector.swift */,
+				160FC72A290C0DC4005B8C00 /* RectsArray.swift */,
+				160FC72C290C57B3005B8C00 /* PhotoCaptureProcessor.swift */,
+				160FC730290FF7A8005B8C00 /* ResultsView.swift */,
+				160FC73229103226005B8C00 /* Button.swift */,
 			);
 			path = Camera;
 			sourceTree = "<group>";
@@ -152,9 +167,14 @@
 			buildActionMask = 2147483647;
 			files = (
 				160FC72328FB0C00005B8C00 /* CameraRunner.swift in Sources */,
+				160FC731290FF7A8005B8C00 /* ResultsView.swift in Sources */,
+				160FC72B290C0DC4005B8C00 /* RectsArray.swift in Sources */,
 				16116FAD28FB0A96005ED2F0 /* ContentView.swift in Sources */,
 				160FC72528FB0C0D005B8C00 /* CameraController.swift in Sources */,
+				160FC72D290C57B3005B8C00 /* PhotoCaptureProcessor.swift in Sources */,
 				16116FAB28FB0A96005ED2F0 /* scannerApp.swift in Sources */,
+				160FC73329103226005B8C00 /* Button.swift in Sources */,
+				160FC729290C0B97005B8C00 /* CameraDetector.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -287,7 +307,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "";
-				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -318,7 +338,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSCameraUsageDescription = "";
-				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "";
+				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
