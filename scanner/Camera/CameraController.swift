@@ -195,6 +195,9 @@ class CameraController: UIViewController {
         DispatchQueue.main.async(execute: { [unowned self] in
             if let results = request.results {
                 guard let observations = results as? [VNTextObservation] else { return }
+//                let filtered = observations.filter({ observation in
+//                    return observation.confidence > 0.99
+//                })
                 extractDetections(observations)
             }
         })
