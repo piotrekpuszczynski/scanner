@@ -30,7 +30,10 @@ class CameraController: UIViewController {
 
     private var capturesInProgress = Set<PhotoCaptureProcessor>()
 
-    private var textRect: CGRect! = nil
+    private var detectedRect: CGRect! = nil
+    
+    private var button: Button! = nil
+    private var resultsView: ResultsView! = nil
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -48,25 +51,25 @@ class CameraController: UIViewController {
         }
     }
 
-    override func willTransition(to newCollection: UITraitCollection, with coordinator: UIViewControllerTransitionCoordinator) {
-        super.willTransition(to: newCollection, with: coordinator)
-        screenRect = UIScreen.main.bounds
-        previewLayer.frame = CGRect(x: 0, y: 0, width: screenRect.size.width, height: screenRect.size.height)
-        detectionLayer.frame = CGRect(x: 0, y: 0, width: screenRect.size.width, height: screenRect.size.height)
-
-        switch UIDevice.current.orientation {
-            case UIDeviceOrientation.portraitUpsideDown:
-                videoOrientation = .portraitUpsideDown
-            case UIDeviceOrientation.landscapeLeft:
-                videoOrientation = .landscapeRight
-            case UIDeviceOrientation.landscapeRight:
-                videoOrientation = .landscapeLeft
-            case UIDeviceOrientation.portrait:
-                videoOrientation = .portrait
-            default:
-                break
-        }
-    }
+//    override func willTransition(to newCollection: UITraitCollection, with coordinator: UIViewControllerTransitionCoordinator) {
+//        super.willTransition(to: newCollection, with: coordinator)
+//        screenRect = UIScreen.main.bounds
+//        previewLayer.frame = CGRect(x: 0, y: 0, width: screenRect.size.width, height: screenRect.size.height)
+//        detectionLayer.frame = CGRect(x: 0, y: 0, width: screenRect.size.width, height: screenRect.size.height)
+//
+//        switch UIDevice.current.orientation {
+//            case UIDeviceOrientation.portraitUpsideDown:
+//                videoOrientation = .portraitUpsideDown
+//            case UIDeviceOrientation.landscapeLeft:
+//                videoOrientation = .landscapeRight
+//            case UIDeviceOrientation.landscapeRight:
+//                videoOrientation = .landscapeLeft
+//            case UIDeviceOrientation.portrait:
+//                videoOrientation = .portrait
+//            default:
+//                break
+//        }
+//    }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -164,22 +167,13 @@ class CameraController: UIViewController {
         requests = [textRectanglesRequest]
     }
 
-    private var photoButtonRect: CGRect! = nil
-    private var photoButton: UIButton! = nil
-    private var resultsView: ResultsView! = nil
-    private var returnButtonRect: CGRect! = nil
-    private var returnButton: Button! = nil
-
     private func setupInterface() {
-        photoButtonRect = CGRect(x: screenRect.size.width - 100, y: screenRect.size.height - 100, width: 50, height: 50)
-        photoButton = Button(cgRect: photoButtonRect, color: interfaceColor, action: #selector(takePhoto))
+        button = Button(color: interfaceColor)
+        button.tapAction = getDetections
 
         DispatchQueue.main.async { [unowned self] in
-            view.addSubview(photoButton)
+            view.addSubview(button)
         }
-
-        returnButtonRect = CGRect(x: screenRect.size.width - 100, y: screenRect.size.height - 150, width: 50, height: 50)
-        returnButton = Button(cgRect: returnButtonRect, color: interfaceColor, action: #selector(exitView))
     }
 
     private func drawBoundingBox(_ bounds: CGRect) -> CALayer {
@@ -195,9 +189,6 @@ class CameraController: UIViewController {
         DispatchQueue.main.async(execute: { [unowned self] in
             if let results = request.results {
                 guard let observations = results as? [VNTextObservation] else { return }
-//                let filtered = observations.filter({ observation in
-//                    return observation.confidence > 0.99
-//                })
                 extractDetections(observations)
             }
         })
@@ -214,35 +205,36 @@ class CameraController: UIViewController {
         guard let biggestRect = rectsArray.getBiggest() else { return }
 
         let objectBounds = VNImageRectForNormalizedRect(biggestRect, Int(screenRect.size.width), Int(screenRect.size.height))
-        textRect = CGRect(x: objectBounds.minX, y: screenRect.size.height - objectBounds.maxY,
+        let textRect = CGRect(x: objectBounds.minX, y: screenRect.size.height - objectBounds.maxY,
                           width: objectBounds.maxX - objectBounds.minX, height: objectBounds.maxY - objectBounds.minY)
             
         let boxLayer = drawBoundingBox(textRect)
+        detectedRect = textRect
         detectionLayer.addSublayer(boxLayer)
     }
 
-    @objc
-    private func takePhoto(_ sender: UIButton!) {
+    private func getDetections() {
         guard sessionSetupSucceed else { return }
 
-        let settings = AVCapturePhotoSettings()
+        DispatchQueue.main.async { [unowned self] in
+            performRequests = false
+            detectionLayer.sublayers = nil
+        }
 
+        let settings = AVCapturePhotoSettings()
         let captureProcessor = PhotoCaptureProcessor()
         capturesInProgress.insert(captureProcessor)
 
-        DispatchQueue.main.async { [unowned self] in
-            photoButton.removeFromSuperview()
-            performRequests = false
-        }
-
-        captureProcessor.cropBounds = textRect
-        captureProcessor.orientation = videoOrientation
-        captureProcessor.completionHandler = { cgImage in
+        captureProcessor.completionHandler = { uiImage in
             DispatchQueue.main.async { [unowned self] in
+                guard
+                    let cropped = uiImage.cropping(to: previewLayer, toSizeOf: detectedRect),
+                    let corrected = cropped.orientationCorrectedImage,
+                    let cgImage = corrected.cgImage
+                else { return }
                 resultsView = ResultsView(cgImage: cgImage, rect: screenRect, interfaceColor: interfaceColor)
-
                 view.addSubview(resultsView)
-                view.addSubview(returnButton)
+                button.tapAction = exitView
 
                 capturesInProgress.remove(captureProcessor)
             }
@@ -253,12 +245,10 @@ class CameraController: UIViewController {
         }
     }
 
-    @objc
-    private func exitView(_ sender: UIButton!) {
+    private func exitView() {
         DispatchQueue.main.async { [unowned self] in
             resultsView.removeFromSuperview()
-            returnButton.removeFromSuperview()
-            view.addSubview(photoButton)
+            button.tapAction = getDetections
 
             performRequests = true
         }
