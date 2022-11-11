@@ -18,6 +18,7 @@
 		16116FAD28FB0A96005ED2F0 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 16116FAC28FB0A96005ED2F0 /* ContentView.swift */; };
 		16116FAF28FB0A96005ED2F0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16116FAE28FB0A96005ED2F0 /* Assets.xcassets */; };
 		16116FB228FB0A96005ED2F0 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16116FB128FB0A96005ED2F0 /* Preview Assets.xcassets */; };
+		1623CDBC291E7385008AEA1E /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1623CDBB291E7385008AEA1E /* Extensions.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -33,6 +34,7 @@
 		16116FAC28FB0A96005ED2F0 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		16116FAE28FB0A96005ED2F0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		16116FB128FB0A96005ED2F0 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		1623CDBB291E7385008AEA1E /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -56,6 +58,7 @@
 				160FC72C290C57B3005B8C00 /* PhotoCaptureProcessor.swift */,
 				160FC730290FF7A8005B8C00 /* ResultsView.swift */,
 				160FC73229103226005B8C00 /* Button.swift */,
+				1623CDBB291E7385008AEA1E /* Extensions.swift */,
 			);
 			path = Camera;
 			sourceTree = "<group>";
@@ -171,6 +174,7 @@
 				160FC72B290C0DC4005B8C00 /* RectsArray.swift in Sources */,
 				16116FAD28FB0A96005ED2F0 /* ContentView.swift in Sources */,
 				160FC72528FB0C0D005B8C00 /* CameraController.swift in Sources */,
+				1623CDBC291E7385008AEA1E /* Extensions.swift in Sources */,
 				160FC72D290C57B3005B8C00 /* PhotoCaptureProcessor.swift in Sources */,
 				16116FAB28FB0A96005ED2F0 /* scannerApp.swift in Sources */,
 				160FC73329103226005B8C00 /* Button.swift in Sources */,

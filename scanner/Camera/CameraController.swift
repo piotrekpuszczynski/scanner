@@ -17,6 +17,7 @@ class CameraController: UIViewController {
     private var previewLayer: AVCaptureVideoPreviewLayer! = nil
     private let detectionLayer = CALayer()
     private let resultsLayer = CALayer()
+    private var blurView: UIVisualEffectView! = nil
 
     internal var requests: Array<VNRequest>! = nil
 
@@ -50,26 +51,6 @@ class CameraController: UIViewController {
             session.startRunning()
         }
     }
-
-//    override func willTransition(to newCollection: UITraitCollection, with coordinator: UIViewControllerTransitionCoordinator) {
-//        super.willTransition(to: newCollection, with: coordinator)
-//        screenRect = UIScreen.main.bounds
-//        previewLayer.frame = CGRect(x: 0, y: 0, width: screenRect.size.width, height: screenRect.size.height)
-//        detectionLayer.frame = CGRect(x: 0, y: 0, width: screenRect.size.width, height: screenRect.size.height)
-//
-//        switch UIDevice.current.orientation {
-//            case UIDeviceOrientation.portraitUpsideDown:
-//                videoOrientation = .portraitUpsideDown
-//            case UIDeviceOrientation.landscapeLeft:
-//                videoOrientation = .landscapeRight
-//            case UIDeviceOrientation.landscapeRight:
-//                videoOrientation = .landscapeLeft
-//            case UIDeviceOrientation.portrait:
-//                videoOrientation = .portrait
-//            default:
-//                break
-//        }
-//    }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -154,8 +135,15 @@ class CameraController: UIViewController {
         sessionSetupSucceed = true
         performRequests = true
 
+        let blur = UIBlurEffect(style: .regular)
+        blurView = UIVisualEffectView(effect: blur)
+        blurView.frame = screenRect
+        blurView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+        blurView.isHidden = true
+
         DispatchQueue.main.async { [unowned self] in
             view.layer.addSublayer(previewLayer)
+            view.addSubview(blurView)
             view.layer.addSublayer(detectionLayer)
         }
     }
@@ -207,16 +195,18 @@ class CameraController: UIViewController {
         let objectBounds = VNImageRectForNormalizedRect(biggestRect, Int(screenRect.size.width), Int(screenRect.size.height))
         let textRect = CGRect(x: objectBounds.minX, y: screenRect.size.height - objectBounds.maxY,
                           width: objectBounds.maxX - objectBounds.minX, height: objectBounds.maxY - objectBounds.minY)
+        let increased = textRect.increase(byPercentage: 1)
             
-        let boxLayer = drawBoundingBox(textRect)
-        detectedRect = textRect
-        detectionLayer.addSublayer(boxLayer)
+        let textBounds = drawBoundingBox(increased)
+        detectedRect = increased
+        detectionLayer.addSublayer(textBounds)
     }
 
     private func getDetections() {
         guard sessionSetupSucceed else { return }
 
         DispatchQueue.main.async { [unowned self] in
+            button.tapAction = nil
             performRequests = false
             detectionLayer.sublayers = nil
         }
@@ -232,9 +222,10 @@ class CameraController: UIViewController {
                     let corrected = cropped.orientationCorrectedImage,
                     let cgImage = corrected.cgImage
                 else { return }
-                resultsView = ResultsView(cgImage: cgImage, rect: screenRect, interfaceColor: interfaceColor)
+                resultsView = ResultsView(cgImage: cgImage, screenRect: screenRect, interfaceColor: interfaceColor)
                 view.addSubview(resultsView)
                 button.tapAction = exitView
+                blurView.isHidden = false
 
                 capturesInProgress.remove(captureProcessor)
             }
@@ -248,9 +239,11 @@ class CameraController: UIViewController {
     private func exitView() {
         DispatchQueue.main.async { [unowned self] in
             resultsView.removeFromSuperview()
+            resultsView = nil
             button.tapAction = getDetections
 
             performRequests = true
+            blurView.isHidden = true
         }
     }
 }

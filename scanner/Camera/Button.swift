@@ -7,7 +7,8 @@ import SwiftUI
 class Button: UIButton {
     var tapAction: (() -> ())! = nil
     required init(color: CGColor) {
-        let cgRect = CGRect(x: UIScreen.main.bounds.width * 0.8, y: UIScreen.main.bounds.height * 0.9, width: 50, height: 50)
+        let size = UIScreen.main.bounds.height * 0.05
+        let cgRect = CGRect(x: UIScreen.main.bounds.width * 0.8, y: UIScreen.main.bounds.height * 0.9, width: size, height: size)
         super.init(frame: cgRect)
         
         backgroundColor = .clear
@@ -22,6 +23,7 @@ class Button: UIButton {
     }
     
     @objc func tapHandler() {
+        guard tapAction != nil else { return }
         tapAction()
     }
 }
