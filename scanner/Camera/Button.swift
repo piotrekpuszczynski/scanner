@@ -22,7 +22,8 @@ class Button: UIButton {
         fatalError("init(coder:) has not been implemented")
     }
     
-    @objc func tapHandler() {
+    @objc
+    func tapHandler() {
         guard tapAction != nil else { return }
         tapAction()
     }

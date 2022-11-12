@@ -17,7 +17,7 @@ class CameraController: UIViewController {
     private var previewLayer: AVCaptureVideoPreviewLayer! = nil
     private let detectionLayer = CALayer()
     private let resultsLayer = CALayer()
-    private var blurView: UIVisualEffectView! = nil
+    private var cameraDarken = CAShapeLayer()
 
     internal var requests: Array<VNRequest>! = nil
 
@@ -135,24 +135,48 @@ class CameraController: UIViewController {
         sessionSetupSucceed = true
         performRequests = true
 
-        let blur = UIBlurEffect(style: .regular)
-        blurView = UIVisualEffectView(effect: blur)
-        blurView.frame = screenRect
-        blurView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-        blurView.isHidden = true
+        let path = CGMutablePath()
+        path.addRect(screenRect)
+
+        cameraDarken.path = path
+        cameraDarken.fillColor = UIColor.black.withAlphaComponent(0.6).cgColor
+        cameraDarken.fillRule = .evenOdd
+        cameraDarken.isHidden = true
 
         DispatchQueue.main.async { [unowned self] in
             view.layer.addSublayer(previewLayer)
-            view.addSubview(blurView)
+            view.layer.addSublayer(cameraDarken)
             view.layer.addSublayer(detectionLayer)
         }
     }
 
     private func setupRequests() {
-        let textRectanglesRequest = VNDetectTextRectanglesRequest(completionHandler: detectionHandler)
-        textRectanglesRequest.reportCharacterBoxes = true
+        let rectsArray = RectsArray()
+        let detectionHandler = DetectionHandler()
+        detectionHandler.preprocessObservation = { [unowned self] in
+            detectionLayer.sublayers = nil
+        }
+        detectionHandler.processObservation = { string, boundingBox in
+            rectsArray.append(boundingBox)
+        }
+        detectionHandler.postprocessObservation = { [unowned self] in
+            guard let biggestRect = rectsArray.getBiggest() else { return }
+            rectsArray.clear()
+
+            let objectBounds = VNImageRectForNormalizedRect(biggestRect, Int(screenRect.size.width), Int(screenRect.size.height))
+            let textRect = CGRect(x: objectBounds.minX, y: screenRect.size.height - objectBounds.maxY,
+                              width: objectBounds.maxX - objectBounds.minX, height: objectBounds.maxY - objectBounds.minY)
+            let increased = textRect.increase(byPercentage: 1)
+                
+            let textBounds = drawBoundingBox(increased)
+            detectedRect = increased
+            detectionLayer.addSublayer(textBounds)
+        }
+
+        let request = VNRecognizeTextRequest(completionHandler: detectionHandler.handeler)
+        request.recognitionLevel = .fast
         
-        requests = [textRectanglesRequest]
+        requests = [request]
     }
 
     private func setupInterface() {
@@ -171,35 +195,6 @@ class CameraController: UIViewController {
         boxLayer.borderColor = interfaceColor
         boxLayer.cornerRadius = 4
         return boxLayer
-    }
-
-    private func detectionHandler(request: VNRequest, error: Error?) {
-        DispatchQueue.main.async(execute: { [unowned self] in
-            if let results = request.results {
-                guard let observations = results as? [VNTextObservation] else { return }
-                extractDetections(observations)
-            }
-        })
-    }
-
-    private func extractDetections(_ observations: [VNTextObservation]) {
-        detectionLayer.sublayers = nil
-        let rectsArray = RectsArray()
-            
-        for observation in observations {
-            rectsArray.append(observation.boundingBox)
-        }
-
-        guard let biggestRect = rectsArray.getBiggest() else { return }
-
-        let objectBounds = VNImageRectForNormalizedRect(biggestRect, Int(screenRect.size.width), Int(screenRect.size.height))
-        let textRect = CGRect(x: objectBounds.minX, y: screenRect.size.height - objectBounds.maxY,
-                          width: objectBounds.maxX - objectBounds.minX, height: objectBounds.maxY - objectBounds.minY)
-        let increased = textRect.increase(byPercentage: 1)
-            
-        let textBounds = drawBoundingBox(increased)
-        detectedRect = increased
-        detectionLayer.addSublayer(textBounds)
     }
 
     private func getDetections() {
@@ -225,7 +220,7 @@ class CameraController: UIViewController {
                 resultsView = ResultsView(cgImage: cgImage, screenRect: screenRect, interfaceColor: interfaceColor)
                 view.addSubview(resultsView)
                 button.tapAction = exitView
-                blurView.isHidden = false
+                cameraDarken.isHidden = false
 
                 capturesInProgress.remove(captureProcessor)
             }
@@ -239,11 +234,10 @@ class CameraController: UIViewController {
     private func exitView() {
         DispatchQueue.main.async { [unowned self] in
             resultsView.removeFromSuperview()
-            resultsView = nil
             button.tapAction = getDetections
 
             performRequests = true
-            blurView.isHidden = true
+            cameraDarken.isHidden = true
         }
     }
 }

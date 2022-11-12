@@ -27,6 +27,10 @@ class RectsArray {
 
         return blockAcs.first
     }
+    
+    func clear() {
+        rects.removeAll()
+    }
 }
 
 extension CGRect {

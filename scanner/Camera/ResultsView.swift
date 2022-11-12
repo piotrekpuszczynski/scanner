@@ -6,11 +6,13 @@ import SwiftUI
 import Vision
 
 class ResultsView: UIImageView {
+    private let cgImage: CGImage
     private let interfaceColor: CGColor
     private let detectionLayer = CALayer()
 
     required init(cgImage: CGImage, screenRect: CGRect, interfaceColor: CGColor) {
         let image = UIImage(cgImage: cgImage)
+        self.cgImage = cgImage
         self.interfaceColor = interfaceColor
         super.init(image: image)
         layer.frame = CGRect(x: 0, y: 0, width: cgImage.width, height: cgImage.height)
@@ -26,11 +28,19 @@ class ResultsView: UIImageView {
     }
     
     func detectText() {
-        guard let cgImage = image?.cgImage else { return }
+        let detectionHandler = DetectionHandler()
+        detectionHandler.processObservation = { [unowned self] string, boundingBox in
+            print(string)
+
+            let rect = VNImageRectForNormalizedRect(boundingBox, Int((image?.size.width)!), Int((image?.size.height)!))
+            let boxLayer = drawBoundingBox(rect)
+            detectionLayer.addSublayer(boxLayer)
+        }
+        
+        let request = VNRecognizeTextRequest(completionHandler: detectionHandler.handeler)
+        request.recognitionLevel = .accurate
 
         let requestHandler = VNImageRequestHandler(cgImage: cgImage)
-        let request = VNRecognizeTextRequest(completionHandler: detectionHandler)
-
         DispatchQueue.main.async {
             do {
                 try requestHandler.perform([request])
@@ -40,41 +50,13 @@ class ResultsView: UIImageView {
         }
     }
 
-    private func detectionHandler(request: VNRequest, error: Error?) {
-        DispatchQueue.main.async(execute: { [unowned self] in
-            if let results = request.results {
-                guard let observations = results as? [VNRecognizedTextObservation] else { return }
-                extractDetections(observations)
-            }
-        })
-    }
-
-    private func extractDetections(_ observations: [VNRecognizedTextObservation]) {
-        for observation in observations {
-            guard let candidate = observation.topCandidates(1).first else { return }
-            
-            // Find the bounding-box observation for the string range.
-            let stringRange = candidate.string.startIndex..<candidate.string.endIndex
-            let boxObservation = try? candidate.boundingBox(for: stringRange)
-            
-            // Get the normalized CGRect value.
-            guard let boundingBox = boxObservation?.boundingBox else { return }
-            
-            // Convert the rectangle from normalized coordinates to image coordinates.
-            let rect =  VNImageRectForNormalizedRect(boundingBox,
-                                                     Int((image?.size.width)!),
-                                                     Int((image?.size.height)!))
-            print(candidate.string)
-            let boxLayer = drawBoundingBox(rect)
-            detectionLayer.addSublayer(boxLayer)
-        }
-    }
-    
     private func drawBoundingBox(_ bounds: CGRect) -> CALayer {
         let boxLayer = CALayer()
         boxLayer.frame = bounds
-        boxLayer.borderWidth = 3.0
+        boxLayer.borderWidth = 2.0
         boxLayer.borderColor = interfaceColor
+//        boxLayer.backgroundColor = CGColor(red: 1, green: 1, blue: 1, alpha: 0.25)
+//        boxLayer.borderColor = CGColor(red: 1, green: 1, blue: 1, alpha: 0.25)
         boxLayer.cornerRadius = 4
         return boxLayer
     }

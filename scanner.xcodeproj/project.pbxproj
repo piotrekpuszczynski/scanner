@@ -19,6 +19,7 @@
 		16116FAF28FB0A96005ED2F0 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16116FAE28FB0A96005ED2F0 /* Assets.xcassets */; };
 		16116FB228FB0A96005ED2F0 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 16116FB128FB0A96005ED2F0 /* Preview Assets.xcassets */; };
 		1623CDBC291E7385008AEA1E /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1623CDBB291E7385008AEA1E /* Extensions.swift */; };
+		1623CDC0291FBF33008AEA1E /* DetectionHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1623CDBF291FBF33008AEA1E /* DetectionHandler.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -35,6 +36,7 @@
 		16116FAE28FB0A96005ED2F0 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		16116FB128FB0A96005ED2F0 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		1623CDBB291E7385008AEA1E /* Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
+		1623CDBF291FBF33008AEA1E /* DetectionHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DetectionHandler.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -51,6 +53,7 @@
 		160FC72128FB0BEF005B8C00 /* Camera */ = {
 			isa = PBXGroup;
 			children = (
+				1623CDBE291FBE8C008AEA1E /* Handlers */,
 				160FC72228FB0C00005B8C00 /* CameraRunner.swift */,
 				160FC72428FB0C0D005B8C00 /* CameraController.swift */,
 				160FC728290C0B97005B8C00 /* CameraDetector.swift */,
@@ -97,6 +100,14 @@
 				16116FB128FB0A96005ED2F0 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		1623CDBE291FBE8C008AEA1E /* Handlers */ = {
+			isa = PBXGroup;
+			children = (
+				1623CDBF291FBF33008AEA1E /* DetectionHandler.swift */,
+			);
+			path = Handlers;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -170,6 +181,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				160FC72328FB0C00005B8C00 /* CameraRunner.swift in Sources */,
+				1623CDC0291FBF33008AEA1E /* DetectionHandler.swift in Sources */,
 				160FC731290FF7A8005B8C00 /* ResultsView.swift in Sources */,
 				160FC72B290C0DC4005B8C00 /* RectsArray.swift in Sources */,
 				16116FAD28FB0A96005ED2F0 /* ContentView.swift in Sources */,
