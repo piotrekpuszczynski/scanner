@@ -5,9 +5,7 @@
 import Vision
 
 class DetectionHandler {
-    var preprocessObservation: (() -> ()) = {}
-    var processObservation: ((_: String, _: CGRect) -> ()) = { _, _ in }
-    var postprocessObservation: (() -> ()) = {}
+    var extractDetections: ((_: [VNRecognizedTextObservation]) -> ()) = { _ in }
     public func handeler(request: VNRequest, error: Error?) {
         DispatchQueue.main.async(execute: { [unowned self] in
             if let results = request.results {
@@ -15,20 +13,5 @@ class DetectionHandler {
                 extractDetections(observations)
             }
         })
-    }
-
-    private func extractDetections(_ observations: [VNRecognizedTextObservation]) {
-        preprocessObservation()
-        for observation in observations {
-            guard let candidate = observation.topCandidates(1).first else { return }
-            
-            let stringRange = candidate.string.startIndex..<candidate.string.endIndex
-            let boxObservation = try? candidate.boundingBox(for: stringRange)
-            
-            guard let boundingBox = boxObservation?.boundingBox else { return }
-
-            processObservation(candidate.string, boundingBox)
-        }
-        postprocessObservation()
     }
 }

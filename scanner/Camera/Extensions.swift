@@ -30,12 +30,42 @@ extension UIImage {
 
         return nil
     }
+
+    func scaleImage(byPercentage p: CGFloat) -> UIImage {
+        let scaledImageSize = CGSize(width: size.width * p, height: size.height * p)
+
+        let renderer = UIGraphicsImageRenderer(size: scaledImageSize)
+
+        let scaledImage = renderer.image { _ in
+            self.draw(in: CGRect(
+                origin: .zero,
+                size: scaledImageSize
+            ))
+        }
+
+        return scaledImage
+    }
 }
 
 extension CGRect {
-    func increase(byPercentage percentage: CGFloat) -> CGRect {
-        let adjustmentWidth = (width * percentage) / 2.0
-        let adjustmentHeight = (height * percentage) / 2.0
-        return CGRectInset(self, -adjustmentWidth, -adjustmentHeight)
+    func resize(percentage p: CGFloat) -> CGRect {
+        let newW = width * p
+        let newH = height * p
+        let newX = minX + (width - newW) / 2
+        let newY = minY + (height - newH) / 2
+
+        return CGRect(x: newX, y: newY, width: newW, height: newH)
+    }
+
+    func merge(_ rect: CGRect) -> CGRect {
+        let x = min(minX, rect.minX)
+        let y = min(minY, rect.minY)
+        let width = rect.minX + rect.width - minX
+        let height = max(minY + height, rect.minY + rect.height) - y
+        return CGRect(x: x, y: y, width: width, height: height)
+    }
+
+    func area() -> CGFloat {
+        return height * width
     }
 }

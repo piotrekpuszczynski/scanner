@@ -8,7 +8,7 @@ import UIKit
 class PhotoCaptureProcessor: NSObject {
     var capturedPhoto: AVCapturePhoto! = nil
     var uiImage: UIImage! = nil
-    var completionHandler: ((UIImage) -> ())! = nil
+    var completionHandler: ((UIImage) -> ()) = { _ in }
 }
 
 extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
@@ -21,7 +21,6 @@ extension PhotoCaptureProcessor: AVCapturePhotoCaptureDelegate {
     }
 
     func photoOutput(_ output: AVCapturePhotoOutput, didFinishCaptureFor resolvedSettings: AVCaptureResolvedPhotoSettings, error: Error?) {
-        guard error == nil && uiImage != nil else { return }
         completionHandler(uiImage)
     }
 }

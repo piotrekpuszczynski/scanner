@@ -70,16 +70,4 @@ extension CGRect {
     func CGPointDistanceSquared(from: CGPoint, to: CGPoint) -> CGFloat {
         return (from.x - to.x) * (from.x - to.x) + (from.y - to.y) * (from.y - to.y)
     }
-
-    func merge(_ rect: CGRect) -> CGRect {
-        let x = min(self.minX, rect.minX)
-        let y = min(self.minY, rect.minY)
-        let width = rect.minX + rect.width - self.minX
-        let height = max(self.minY + self.height, rect.minY + rect.height) - y
-        return CGRect(x: x, y: y, width: width, height: height)
-    }
-    
-    func area() -> CGFloat {
-        return self.height * self.width
-    }
 }

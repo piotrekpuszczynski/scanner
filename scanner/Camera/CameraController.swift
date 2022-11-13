@@ -15,9 +15,9 @@ class CameraController: UIViewController {
     private var screenRect: CGRect! = nil
 
     private var previewLayer: AVCaptureVideoPreviewLayer! = nil
+    private var cameraDarken = CALayer()
     private let detectionLayer = CALayer()
     private let resultsLayer = CALayer()
-    private var cameraDarken = CAShapeLayer()
 
     internal var requests: Array<VNRequest>! = nil
 
@@ -33,7 +33,7 @@ class CameraController: UIViewController {
 
     private var detectedRect: CGRect! = nil
     
-    private var button: Button! = nil
+    private var button = Button(xByPercentage: 0.8, yByPercentage: 0.9)
     private var resultsView: ResultsView! = nil
 
     override func viewDidLoad() {
@@ -73,13 +73,6 @@ class CameraController: UIViewController {
             }
         }
     }
-    
-//    override func viewWillLayoutSubviews() {
-//        super.viewWillLayoutSubviews()
-//
-//        screenRect = UIScreen.main.bounds
-//        previewLayer.frame = CGRect(x: 0, y: 0, width: screenRect.size.width, height: screenRect.size.height)
-//    }
 
     private func checkPermission() {
         switch AVCaptureDevice.authorizationStatus(for: .video) {
@@ -135,12 +128,8 @@ class CameraController: UIViewController {
         sessionSetupSucceed = true
         performRequests = true
 
-        let path = CGMutablePath()
-        path.addRect(screenRect)
-
-        cameraDarken.path = path
-        cameraDarken.fillColor = UIColor.black.withAlphaComponent(0.6).cgColor
-        cameraDarken.fillRule = .evenOdd
+        cameraDarken.frame = screenRect
+        cameraDarken.backgroundColor = UIColor.black.withAlphaComponent(0.8).cgColor
         cameraDarken.isHidden = true
 
         DispatchQueue.main.async { [unowned self] in
@@ -153,34 +142,41 @@ class CameraController: UIViewController {
     private func setupRequests() {
         let rectsArray = RectsArray()
         let detectionHandler = DetectionHandler()
-        detectionHandler.preprocessObservation = { [unowned self] in
+        detectionHandler.extractDetections = { [unowned self] observations in
             detectionLayer.sublayers = nil
-        }
-        detectionHandler.processObservation = { string, boundingBox in
-            rectsArray.append(boundingBox)
-        }
-        detectionHandler.postprocessObservation = { [unowned self] in
+
+            for observation in observations {
+                guard let candidate = observation.topCandidates(1).first else { return }
+
+                let stringRange = candidate.string.startIndex..<candidate.string.endIndex
+                let boxObservation = try? candidate.boundingBox(for: stringRange)
+
+                guard let boundingBox = boxObservation?.boundingBox else { return }
+
+                rectsArray.append(boundingBox)
+            }
+
             guard let biggestRect = rectsArray.getBiggest() else { return }
             rectsArray.clear()
 
             let objectBounds = VNImageRectForNormalizedRect(biggestRect, Int(screenRect.size.width), Int(screenRect.size.height))
             let textRect = CGRect(x: objectBounds.minX, y: screenRect.size.height - objectBounds.maxY,
                               width: objectBounds.maxX - objectBounds.minX, height: objectBounds.maxY - objectBounds.minY)
-            let increased = textRect.increase(byPercentage: 1)
-                
-            let textBounds = drawBoundingBox(increased)
+            let increased = textRect.resize(percentage: 1.25)
+
             detectedRect = increased
+            let textBounds = drawBoundingBox(increased)
             detectionLayer.addSublayer(textBounds)
         }
 
         let request = VNRecognizeTextRequest(completionHandler: detectionHandler.handeler)
         request.recognitionLevel = .fast
+//        request.minimumTextHeight = 1/50
         
         requests = [request]
     }
 
     private func setupInterface() {
-        button = Button(color: interfaceColor)
         button.tapAction = getDetections
 
         DispatchQueue.main.async { [unowned self] in
@@ -203,7 +199,7 @@ class CameraController: UIViewController {
         DispatchQueue.main.async { [unowned self] in
             button.tapAction = nil
             performRequests = false
-            detectionLayer.sublayers = nil
+            detectionLayer.isHidden = true
         }
 
         let settings = AVCapturePhotoSettings()
@@ -217,8 +213,8 @@ class CameraController: UIViewController {
                     let corrected = cropped.orientationCorrectedImage,
                     let cgImage = corrected.cgImage
                 else { return }
-                resultsView = ResultsView(cgImage: cgImage, screenRect: screenRect, interfaceColor: interfaceColor)
-                view.addSubview(resultsView)
+                resultsView = ResultsView(cgImage: cgImage, screenRect: screenRect)
+                view.insertSubview(resultsView, belowSubview: button)
                 button.tapAction = exitView
                 cameraDarken.isHidden = false
 
@@ -238,6 +234,7 @@ class CameraController: UIViewController {
 
             performRequests = true
             cameraDarken.isHidden = true
+            detectionLayer.isHidden = false
         }
     }
 }

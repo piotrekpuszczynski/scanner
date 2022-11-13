@@ -3,7 +3,6 @@
 //
 
 import AVFoundation
-import UIKit
 import Vision
 
 extension CameraController: AVCaptureVideoDataOutputSampleBufferDelegate {
