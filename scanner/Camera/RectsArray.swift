@@ -21,9 +21,13 @@ class RectsArray {
     func getBiggest() -> CGRect? {
         if rects.isEmpty { return nil }
 
-        let blockAcs = rects.sorted { first, second in
-            first.area() > second.area()
-        }
+        let blockAcs = rects
+            .filter({ rect in
+                return rect.size.width > 0.1
+            })
+            .sorted(by: { first, second in
+                first.area() > second.area()
+            })
 
         return blockAcs.first
     }

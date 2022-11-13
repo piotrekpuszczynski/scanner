@@ -19,6 +19,8 @@ class ResultsView: UIView {
         layer.frame = screenRect
         
         imageView.center = CGPoint(x: screenRect.size.width / 2, y: screenRect.size.height / 2)
+        imageView.layer.cornerRadius = 8
+        imageView.clipsToBounds = true
         addSubview(imageView)
         layer.addSublayer(detectionLayer)
 
@@ -67,7 +69,7 @@ class ResultsView: UIView {
             let button = Button(xByPercentage: 0.1, yByPercentage: 0.9)
             button.tapAction = {
                 UIPasteboard.general.string = text
-                let alert = UIAlertController(title: "Text copied", message: nil, preferredStyle: .actionSheet)
+                let alert = UIAlertController(title: "Text copied", message: nil, preferredStyle: .alert)
 
                 guard let rootViewController = self.window?.rootViewController else { return }
                 rootViewController.present(alert, animated: true, completion: {

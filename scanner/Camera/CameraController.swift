@@ -162,7 +162,7 @@ class CameraController: UIViewController {
             let objectBounds = VNImageRectForNormalizedRect(biggestRect, Int(screenRect.size.width), Int(screenRect.size.height))
             let textRect = CGRect(x: objectBounds.minX, y: screenRect.size.height - objectBounds.maxY,
                               width: objectBounds.maxX - objectBounds.minX, height: objectBounds.maxY - objectBounds.minY)
-            let increased = textRect.resize(percentage: 1.25)
+            let increased = textRect.resize(percentage: 1.75)
 
             detectedRect = increased
             let textBounds = drawBoundingBox(increased)
@@ -171,7 +171,7 @@ class CameraController: UIViewController {
 
         let request = VNRecognizeTextRequest(completionHandler: detectionHandler.handeler)
         request.recognitionLevel = .fast
-//        request.minimumTextHeight = 1/50
+//        request.minimumTextHeight = 1/32
         
         requests = [request]
     }
