@@ -53,7 +53,7 @@
 		160FC72128FB0BEF005B8C00 /* Camera */ = {
 			isa = PBXGroup;
 			children = (
-				1623CDBE291FBE8C008AEA1E /* Handlers */,
+				1623CDBE291FBE8C008AEA1E /* Detectors */,
 				160FC72228FB0C00005B8C00 /* CameraRunner.swift */,
 				160FC72428FB0C0D005B8C00 /* CameraController.swift */,
 				160FC728290C0B97005B8C00 /* CameraDetector.swift */,
@@ -102,12 +102,12 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
-		1623CDBE291FBE8C008AEA1E /* Handlers */ = {
+		1623CDBE291FBE8C008AEA1E /* Detectors */ = {
 			isa = PBXGroup;
 			children = (
 				1623CDBF291FBF33008AEA1E /* DetectionHandler.swift */,
 			);
-			path = Handlers;
+			path = Detectors;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

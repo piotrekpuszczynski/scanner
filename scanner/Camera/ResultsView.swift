@@ -32,8 +32,8 @@ class ResultsView: UIView {
     }
     
     func detectText() {
-        let detectionHandler = DetectionHandler()
-        detectionHandler.extractDetections = { [unowned self] observations in
+        let detector = Detector()
+        detector.extractDetections = { [unowned self] observations in
             var text = ""
             for observation in observations {
                 guard let candidate = observation.topCandidates(1).first else { return }
@@ -126,7 +126,7 @@ class ResultsView: UIView {
 //            addSubview(textView)
         }
         
-        let request = VNRecognizeTextRequest(completionHandler: detectionHandler.handeler)
+        let request = VNRecognizeTextRequest(completionHandler: detector.handeler)
         request.recognitionLevel = .accurate
 
         let requestHandler = VNImageRequestHandler(cgImage: cgImage)

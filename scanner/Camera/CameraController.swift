@@ -11,6 +11,7 @@ class CameraController: UIViewController {
     private let sessionQueue = DispatchQueue(label: "Session Queue")
     private let videoOutput = AVCaptureVideoDataOutput()
     private let photoOutput = AVCapturePhotoOutput()
+    private var detector: Detector! = nil
 
     private var screenRect: CGRect! = nil
 
@@ -141,8 +142,8 @@ class CameraController: UIViewController {
 
     private func setupRequests() {
         let rectsArray = RectsArray()
-        let detectionHandler = DetectionHandler()
-        detectionHandler.extractDetections = { [unowned self] observations in
+        detector = Detector()
+        detector.extractDetections = { [unowned self] observations in
             detectionLayer.sublayers = nil
 
             for observation in observations {
@@ -161,7 +162,7 @@ class CameraController: UIViewController {
 
             let objectBounds = VNImageRectForNormalizedRect(biggestRect, Int(screenRect.size.width), Int(screenRect.size.height))
             let textRect = CGRect(x: objectBounds.minX, y: screenRect.size.height - objectBounds.maxY,
-                              width: objectBounds.maxX - objectBounds.minX, height: objectBounds.maxY - objectBounds.minY)
+                                  width: objectBounds.maxX - objectBounds.minX, height: objectBounds.maxY - objectBounds.minY)
             let increased = textRect.resize(percentage: 1.75)
 
             detectedRect = increased
@@ -169,8 +170,10 @@ class CameraController: UIViewController {
             detectionLayer.addSublayer(textBounds)
         }
 
-        let request = VNRecognizeTextRequest(completionHandler: detectionHandler.handeler)
+        let request = VNRecognizeTextRequest(completionHandler: detector.handeler)
         request.recognitionLevel = .fast
+        request.usesLanguageCorrection = false
+//        request.regionOfInterest = screenRect
 //        request.minimumTextHeight = 1/32
         
         requests = [request]
