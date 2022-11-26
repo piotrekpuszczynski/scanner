@@ -4,14 +4,13 @@
 
 import AVFoundation
 import UIKit
-import Vision
 
 class CameraController: UIViewController {
     private let session = AVCaptureSession()
     private let sessionQueue = DispatchQueue(label: "Session Queue")
     private let videoOutput = AVCaptureVideoDataOutput()
     private let photoOutput = AVCapturePhotoOutput()
-    private var detector: Detector! = nil
+    private var detector: FastDetector! = nil
 
     private var screenRect: CGRect! = nil
 
@@ -20,13 +19,10 @@ class CameraController: UIViewController {
     private let detectionLayer = CALayer()
     private let resultsLayer = CALayer()
 
-    internal var requests: Array<VNRequest>! = nil
-
     private var videoOrientation: AVCaptureVideoOrientation = .portrait
 
     private var permissionGranted = false
     private var sessionSetupSucceed = false
-    internal var performRequests = false
 
     private let interfaceColor = CGColor.init(red: 1.0, green: 1.0, blue: 1.0, alpha: 1.0)
 
@@ -46,7 +42,7 @@ class CameraController: UIViewController {
             guard permissionGranted else { return }
             
             setupCaptureSession()
-            setupRequests()
+            setupDetector()
             setupInterface()
 
             session.startRunning()
@@ -58,7 +54,7 @@ class CameraController: UIViewController {
 
         sessionQueue.async { [unowned self] in
             if sessionSetupSucceed {
-                setupRequests()
+                setupDetector()
                 setupInterface()
                 session.startRunning()
             }
@@ -113,7 +109,7 @@ class CameraController: UIViewController {
         resultsLayer.frame = CGRect(x: 0, y: 0, width: screenRect.size.width, height: screenRect.size.height)
 
         videoOutput.alwaysDiscardsLateVideoFrames = true
-        videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "videoBufferQueue"))
+//        videoOutput.setSampleBufferDelegate(detector, queue: DispatchQueue(label: "videoBufferQueue"))
 
         guard
             session.canAddOutput(videoOutput),
@@ -127,7 +123,6 @@ class CameraController: UIViewController {
         photoOutput.connection(with: .video)?.videoOrientation = videoOrientation
 
         sessionSetupSucceed = true
-        performRequests = true
 
         cameraDarken.frame = screenRect
         cameraDarken.backgroundColor = UIColor.black.withAlphaComponent(0.8).cgColor
@@ -140,43 +135,9 @@ class CameraController: UIViewController {
         }
     }
 
-    private func setupRequests() {
-        let rectsArray = RectsArray()
-        detector = Detector()
-        detector.extractDetections = { [unowned self] observations in
-            detectionLayer.sublayers = nil
-
-            for observation in observations {
-                guard let candidate = observation.topCandidates(1).first else { return }
-
-                let stringRange = candidate.string.startIndex..<candidate.string.endIndex
-                let boxObservation = try? candidate.boundingBox(for: stringRange)
-
-                guard let boundingBox = boxObservation?.boundingBox else { return }
-
-                rectsArray.append(boundingBox)
-            }
-
-            guard let biggestRect = rectsArray.getBiggest() else { return }
-            rectsArray.clear()
-
-            let objectBounds = VNImageRectForNormalizedRect(biggestRect, Int(screenRect.size.width), Int(screenRect.size.height))
-            let textRect = CGRect(x: objectBounds.minX, y: screenRect.size.height - objectBounds.maxY,
-                                  width: objectBounds.maxX - objectBounds.minX, height: objectBounds.maxY - objectBounds.minY)
-            let increased = textRect.resize(percentage: 1.75)
-
-            detectedRect = increased
-            let textBounds = drawBoundingBox(increased)
-            detectionLayer.addSublayer(textBounds)
-        }
-
-        let request = VNRecognizeTextRequest(completionHandler: detector.handeler)
-        request.recognitionLevel = .fast
-        request.usesLanguageCorrection = false
-//        request.regionOfInterest = screenRect
-//        request.minimumTextHeight = 1/32
-        
-        requests = [request]
+    private func setupDetector() {
+        detector = FastVision(layer: detectionLayer, screenRect: screenRect, color: interfaceColor)
+        videoOutput.setSampleBufferDelegate(detector, queue: DispatchQueue(label: "videoBufferQueue"))
     }
 
     private func setupInterface() {
@@ -187,13 +148,8 @@ class CameraController: UIViewController {
         }
     }
 
-    private func drawBoundingBox(_ bounds: CGRect) -> CALayer {
-        let boxLayer = CALayer()
-        boxLayer.frame = bounds
-        boxLayer.borderWidth = 3.0
-        boxLayer.borderColor = interfaceColor
-        boxLayer.cornerRadius = 4
-        return boxLayer
+    private func callFromDetector() {
+        detectedRect = detector?.rectChanged()
     }
 
     private func getDetections() {
@@ -201,7 +157,7 @@ class CameraController: UIViewController {
 
         DispatchQueue.main.async { [unowned self] in
             button.tapAction = nil
-            performRequests = false
+            detector.performRequests = false
             detectionLayer.isHidden = true
         }
 
@@ -211,6 +167,7 @@ class CameraController: UIViewController {
 
         captureProcessor.completionHandler = { uiImage in
             DispatchQueue.main.async { [unowned self] in
+                callFromDetector()
                 guard
                     let cropped = uiImage.cropping(to: previewLayer, toSizeOf: detectedRect),
                     let corrected = cropped.orientationCorrectedImage,
@@ -235,7 +192,7 @@ class CameraController: UIViewController {
             resultsView.removeFromSuperview()
             button.tapAction = getDetections
 
-            performRequests = true
+            detector.performRequests = true
             cameraDarken.isHidden = true
             detectionLayer.isHidden = false
         }
